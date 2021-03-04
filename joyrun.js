@@ -3,7 +3,7 @@
 ===================Quantumult X=====================
 [task_local]
 # 宠汪汪邀请助力与赛跑助力
-15 10 * * * https://gitee.com/lxk0301/jd_scripts/raw/master/jd_joy_run.js, tag=宠汪汪邀请助力与赛跑助力, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jdcww.png, enabled=true
+15 10,17 * * * https://raw.githubusercontent.com/hduwhyso/sync/main/joyrun.js, tag=宠汪汪邀请助力与赛跑助力, img-url=https://raw.githubusercontent.com/58xinian/icon/master/jdcww.png, enabled=true
 
  **/
 
