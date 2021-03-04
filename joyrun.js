@@ -40,7 +40,7 @@ temp = [...fixPins, ...randomPins];
 run_pins = [temp.join(',')];
 // $.LKYLToken = '76fe7794c475c18711e3b47185f114b5' || $.getdata('jdJoyRunToken');
 // $.LKYLToken = $.getdata('jdJoyRunToken');
-let friendsArr = ["jd_julBEausqrhE,jf-chase,201116391-607759,13777533321_p,jd_780ac31fe307e"]
+let friendsArr = ["jd_julBEausqrhE,jf-chase,201116391-607759,13777533321_p"]
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 //IOS等用户直接用NobyDa的jd cookie
