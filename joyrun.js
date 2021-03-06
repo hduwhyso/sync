@@ -1,5 +1,8 @@
 /**
 宠汪汪邀请助力与赛跑助力脚本
+
+docker下填写京东用户名后直接用，不需要token。
+
 ===================Quantumult X=====================
 [task_local]
 # 宠汪汪邀请助力与赛跑助力
@@ -12,9 +15,9 @@
  
 //此处填入你需要助力好友的京东用户名
 //下面给出好友邀请助力的示例填写规则
-let invite_pins = ["jd_julBEausqrhE,jf-chase,201116391-607759,13777533321_p,jd_780ac31fe307e"];
+let invite_pins = ["jd_julBEausqrhE","jf-chase","201116391-607759","13777533321_p","jd_780ac31fe307e"];
 //下面给出好友赛跑助力的示例填写规则
-let run_pins = ["jd_julBEausqrhE,jf-chase,201116391-607759,13777533321_p,jd_780ac31fe307e"];
+let run_pins = ["jd_julBEausqrhE","jf-chase","201116391-607759","13777533321_p","jd_780ac31fe307e"];
 
 
 
@@ -32,15 +35,16 @@ const isRequest = typeof $request != "undefined"
 const $ = new Env('宠汪汪赛跑');
 const JD_BASE_API = `https://draw.jdfcloud.com//pet`;
 
-let temp = run_pins[0].split(',')
-let fixPins = temp.splice(temp.indexOf('jd_6cd93e613b0e5'), 1);
-fixPins.push(...temp.splice(temp.indexOf('被折叠的记忆33'), 1));
-const randomPins = getRandomArrayElements(temp, 4);
-temp = [...fixPins, ...randomPins];
-run_pins = [temp.join(',')];
+// let temp = run_pins[0].split(',')
+// let fixPins = temp.splice(temp.indexOf('jd_6cd93e613b0e5'), 1);
+// fixPins.push(...temp.splice(temp.indexOf('被折叠的记忆33'), 1));
+// const randomPins = getRandomArrayElements(temp, 4);
+// temp = [...fixPins, ...randomPins];
+// run_pins = [temp.join(',')];
+
 // $.LKYLToken = '76fe7794c475c18711e3b47185f114b5' || $.getdata('jdJoyRunToken');
 // $.LKYLToken = $.getdata('jdJoyRunToken');
-let friendsArr = ["jd_julBEausqrhE,jf-chase,201116391-607759,13777533321_p"]
+let friendsArr = ["201116391-607759","jd_julBEausqrhE","jf-chase","13777533321_p"]
 //Node.js用户请在jdCookie.js处填写京东ck;
 const jdCookieNode = $.isNode() ? require('./jdCookie.js') : '';
 //IOS等用户直接用NobyDa的jd cookie
@@ -197,14 +201,14 @@ async function main() {
       $.jdLogin = true;
       $.LKYLLogin = true;
       console.log(`=============【开始邀请助力】===============`)
-      const inviteIndex = $.index > invite_pins.length ? (invite_pins.length - 1) : ($.index - 1);
-      let new_invite_pins = invite_pins[inviteIndex].split(',');
-      new_invite_pins = [...new_invite_pins, ...getRandomArrayElements(friendsArr, friendsArr.length >= 18 ? 18 : friendsArr.length)];
+      // const inviteIndex = $.index > invite_pins.length ? (invite_pins.length - 1) : ($.index - 1);
+      let new_invite_pins = invite_pins      
       await invite(new_invite_pins);
       if ($.jdLogin && $.LKYLLogin) {
         console.log(`===========【开始助力好友赛跑】===========`)
-        const runIndex = $.index > run_pins.length ? (run_pins.length - 1) : ($.index - 1);
-        let new_run_pins = run_pins[runIndex].split(',');
+        // const runIndex = $.index > run_pins.length ? (run_pins.length - 1) : ($.index - 1);
+        // let new_run_pins = run_pins[runIndex].split(',');
+        new_run_pins = [...run_pins, ...friendsArr];
         await run(new_run_pins);
       }
       await showMsg();
