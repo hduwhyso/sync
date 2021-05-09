@@ -57,9 +57,6 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
         continue
       }
       await accountCheck();
-      while (!$.hasDone) {
-        await $.wait(1000)
-      }     
       if ($.accountCheck) {
         await jdBeauty();
       }
@@ -75,6 +72,7 @@ const JD_API_HOST = 'https://api.m.jd.com/client.action';
 })
 
 async function accountCheck(){
+  return new Promise (async resolve =>{
   $.hasDone = false;
     console.log(`***检测账号是否黑号***`);
   await getIsvToken()
@@ -86,7 +84,7 @@ async function accountCheck(){
   }
     let client = new WebSocket(`wss://xinruimz-isv.isvjcloud.com/wss/?token=${$.token}`,null,{
       headers:{
-        'user-agent': process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1",
+        'user-agent': process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;android;9.5.0;5.1.1;8363331303230333330383934363-73D2138356239366237373730303;network/wifi;model/vivo X7;addressid/4092959325;aid/e3378926a846c4f7;oaid/;osVer/22;appBuild/87697;partner/vivo;eufv/1;jdSupportDarkMode/0;Mozilla/5.0 (Linux; Android 5.1.1; vivo X7 Build/LMY47V; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/66.0.3359.126 MQQBrowser/6.2 TBS/044942 Mobile Safari/537.36",
       }
     });
     client.onopen = async () => {   
@@ -102,23 +100,24 @@ async function accountCheck(){
         let vo = JSON.parse(e.data);
         if(vo.msg === "风险用户"){
           $.accountCheck=false;
-          // $.init=true;
           client.close();
           console.log(`${vo.msg}，跳过此账号`)};
       } else if (vo.action === "get_user") {
-        // $.init=true;
         $.accountCheck=true;
         client.close();
         console.log(`${vo.msg}，账号正常`);
       }
     };
+    client.onerror = function(event) {
+      console.log(event);
+    };
     client.onclose = (e) => {
-      $.hasDone = true;
-      // console.log(client.readyState);
       console.log('服务器连接关闭');
+      resolve();
     }; 
     await $.wait(1000);
   }
+})
 }
 
 async function jdBeauty() { 
@@ -148,7 +147,7 @@ async function mr() {
   $.needs = []
   let client = new WebSocket(`wss://xinruimz-isv.isvjcloud.com/wss/?token=${$.token}`,null,{
     headers:{
-      'user-agent': process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "Mozilla/5.0 (iPhone; CPU iPhone OS 14_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.3 Mobile/15E148 Safari/604.1",
+      'user-agent': process.env.JD_USER_AGENT ? process.env.JD_USER_AGENT : "jdapp;android;9.5.0;5.1.1;8363331303230333330383934363-73D2138356239366237373730303;network/wifi;model/vivo X7;addressid/4092959325;aid/e3378926a846c4f7;oaid/;osVer/22;appBuild/87697;partner/vivo;eufv/1;jdSupportDarkMode/0;Mozilla/5.0 (Linux; Android 5.1.1; vivo X7 Build/LMY47V; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/66.0.3359.126 MQQBrowser/6.2 TBS/044942 Mobile Safari/537.36",
     }
   })
   // console.log(`wss://xinruimz-isv.isvjcloud.com/wss/?token=${$.token}`)
@@ -166,7 +165,7 @@ async function mr() {
         await $.wait(1000);
         // console.log(2);
       }
-      console.log(helpInfo);
+      // console.log(helpInfo);
       for (let help of helpInfo) {
         client.send(help);
       }
@@ -211,6 +210,9 @@ async function mr() {
       await $.wait(1000);
       // 获得福利中心
       client.send(`{"msg":{"type":"action","args":{},"action":"get_benefit"}}`);
+      await $.wait(1000);
+      // 美妆广场收取美妆币
+      client.send(`{"msg":{"type":"action","args":{},"action":"auto_sell_index"}}`);
   };
 
   client.onclose = () => {
@@ -222,6 +224,13 @@ async function mr() {
       $.helpInfo.push(`{"msg":{"type":"action","args":{"inviter_id":"${$.userInfo.id}","position":"${$.pos[i]}","token":"${$.tokens[i]}"},"action":"employee"}}`)
     }
   };
+  client.onerror = function(event) {
+    console.log(event);
+  };
+  
+  client.addEventListener("error", function(event) {
+    console.log(event);
+  });
   client.onmessage = async function (e) {
     if (e.data !== 'pong' && e.data && safeGet(e.data)) {
       let vo = JSON.parse(e.data);
@@ -334,17 +343,16 @@ async function mr() {
           }
           break
         case "produce_position_info_v2":
-          // console.log(`${Boolean(vo?.data)};${vo?.data?.material_name !== ''}`);
           if (vo.data && vo.data.material_name !== '') {
-            console.log(`【${vo?.data?.position}】上正在生产【${vo?.data?.material_name}】，可收取 ${vo.data.produce_num} 份`)
+            console.log(`【${vo.data.position}】上正在生产【${vo.data.material_name}】，可收取 ${vo.data.produce_num} 份`)
             if (new Date().getTime() > vo.data.procedure.end_at) {
-              console.log(`去收取${vo?.data?.material_name}`)
-              client.send(`{"msg":{"type":"action","args":{"position":"${vo?.data?.position}","replace_material":false},"action":"material_fetch_v2"}}`)
+              console.log(`去收取${vo.data.material_name}`)
+              client.send(`{"msg":{"type":"action","args":{"position":"${vo.data.position}","replace_material":false},"action":"material_fetch_v2"}}`)
               client.send(`{"msg":{"type":"action","args":{},"action":"to_employee"}}`)
-              $.pos.push(vo?.data?.position)
+              $.pos.push(vo.data.position)
             }
           } else {
-            if (vo?.data && vo.data.valid_electric > 0) {
+            if (vo.data && vo.data.valid_electric > 0) {
               console.log(`【${vo.data.position}】上尚未开始生产`)
               let ma
               console.log(`$.needs:${JSON.stringify($.needs)}`);
@@ -373,7 +381,7 @@ async function mr() {
           }
           break
         case "material_produce_v2":
-          console.log(`【${vo.data.position}】上开始生产${vo?.data?.material_name}`)
+          console.log(`【${vo.data.position}】上开始生产${vo.data.material_name}`)
           client.send(`{"msg":{"type":"action","args":{},"action":"to_employee"}}`)
           $.pos.push(vo.data.position)
           break
@@ -427,7 +435,7 @@ async function mr() {
               if (num !== Infinity && num > 0) {
                 msg += `，可生产 ${num}份`
                 console.log(msg)
-                console.log(`【${product.name}】可生产份数大于0，去生产`)
+                console.log(`【${product.name}】可生产份数${num}份，马上去生产`)
                 //product_produce 产品研发里的生产
                 client.send(`{"msg":{"type":"action","args":{"product_id":${product.id},"amount":${num}},"action":"product_produce"}}`)
                 await $.wait(500)
@@ -447,7 +455,7 @@ async function mr() {
           break
         case "product_produce":
           if (vo.code === '200' || vo.code === 200) {
-            // console.log(`product_produce:${JSON.stringify(vo)}`)
+            console.log(`product_produce:${JSON.stringify(vo)}`)
             console.log(`生产成功`)
           } else {
             console.log(`生产信息获取失败，错误信息${vo.msg}`)
@@ -517,6 +525,13 @@ async function mr() {
         case "employee":
           console.log(`${vo.msg}`)
           break
+        case "auto_sell_index":
+          console.log(`next_collect_time：${vo.next_collect_time}s`);
+          if(vo.status === 1){
+            client.send(`{"msg":{"type":"action","args":{},"action":"collect_coins"}}`);
+          }
+        case "collect_coins":
+          console.log(`收获：${vo.data.coins}美妆币，收获后美妆币为${vo.user_coins}`);
       }
     }
   };
