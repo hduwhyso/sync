@@ -427,7 +427,7 @@ async function mr() {
                 } else {
                   if(need_material.findIndex(vo=>vo.id===material.material.id)===-1)
                     need_material.push(material.material)
-                    console.log(`need_material:${JSON.stringify(need_material)}`);
+                    // console.log(`need_material:${JSON.stringify(need_material)}`);
                   msg += `(没有库存)`
                   num = -1000
                 }
@@ -491,7 +491,7 @@ async function mr() {
         case 'get_benefit':
           for (let benefit of vo.data) {
             if (benefit.type === 1) { //type 1 是京豆
-              console.log(`benefit:${JSON.stringify(benefit)}`);
+              // console.log(`benefit:${JSON.stringify(benefit)}`);
               if(benefit.description === "1 京豆" &&   //500颗京豆打包兑换
               parseInt(benefit.day_exchange_count) < 10 && 
               $.total > benefit.coins){
@@ -500,7 +500,7 @@ async function mr() {
                   client.send(`{"msg":{"type":"action","args":{"benefit_id":${benefit.id}},"action":"to_exchange"}}`);
                   await $.wait(1000);
                 }
-              }
+              } else{console.log(`今天1京豆已经兑换，明天再来`)}
               // console.log(`物品【${benefit.description}】需要${benefit.coins}美妆币，库存${benefit.stock}份`)
               // if (parseInt(benefit.setting.beans_count) === bean && //兑换多少豆 bean500就500豆
               //   $.total > benefit.coins &&
@@ -511,27 +511,34 @@ async function mr() {
               // }
             }
           }
-          break
+          break;
         case "to_exchange":
           console.log(`兑换${vo.data.coins/-100}京豆成功;${JSON.stringify(vo)}`)
-          break
+          break;
         case "get_produce_material":
           $.material = vo.data
-          break
+          break;
         case "to_employee":
           console.log(`雇佣助力码【${vo.data.token}】`)
           $.tokens.push(vo.data.token)
-          break
+          break;
         case "employee":
           console.log(`${vo.msg}`)
-          break
+          break;
         case "auto_sell_index":
-          console.log(`next_collect_time：${vo.next_collect_time}s`);
-          if(vo.status === 1){
+          console.log(`vo：${JSON.stringify(vo)}s`);
+          console.log(`next_collect_time：${vo.data.next_collect_time}s`);
+          if(vo.data.status === 1){
+            console.log(`美妆广场有美妆币待领取，现在前去领取`);
             client.send(`{"msg":{"type":"action","args":{},"action":"collect_coins"}}`);
+          } else if(vo.data.status === 0){
+            console.log(`美妆广场没有美妆币待领取`);
           }
+          break;
         case "collect_coins":
-          console.log(`收获：${vo.data.coins}美妆币，收获后美妆币为${vo.user_coins}`);
+          console.log(`开始领取美妆广场的美妆币`);
+          console.log(`收获：${vo.data.coins}美妆币，收获后美妆币为${vo.data.user_coins}`);
+          break;
       }
     }
   };
