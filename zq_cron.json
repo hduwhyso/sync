@@ -47,7 +47,7 @@
     {
       "name": "中青福利视频",
       "type": "cron",
-      "time": "20 21 * * *",
+      "time": "20 12 * * *",
       "running": true,
       "job": {
         "type": "runjs",
@@ -87,7 +87,7 @@
     {
       "name": "中青抽奖",
       "type": "cron",
-      "time": "34 22 * * *",
+      "time": "34 18 * * *",
       "running": true,
       "job": {
         "type": "runjs",
