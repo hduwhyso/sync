@@ -27,6 +27,11 @@
       "match": "https://kandian.wkandian.com/v17/NewTask/getTaskList.json",
       "target": "https://raw.githubusercontent.com/shaolin-kongfu/js_scripts/main/zq/zq_today_score.js",
       "enable": true
+    },
+     {
+      "match": "https://kandian.wkandian.com/v17/NewTask/getTaskList.json",
+      "target": "https://raw.githubusercontent.com/shaolin-kongfu/js_scripts/main/jc_share.js",
+      "enable": true
     }
     ,
     {
